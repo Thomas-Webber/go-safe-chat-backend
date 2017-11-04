@@ -8,12 +8,8 @@ import (
 	"fmt"
 )
 
-type User struct{
-	id int
-	name string
-}
 
-//var channels = make(map[string][]User)
+
 
 func main() {
 
