@@ -20,6 +20,7 @@ type User struct{
 const BACKEND_USER_NAME = "go-safe-chat-backend"
 const ACTION_USER_LIST 	= "userList"
 const ACTION_NEW_USER 	= "newUser"
+const ACTION_USER_EXIT  = "userLeft"
 const ACTION_MESSAGE 	= "message"
 
 var channels = make(map[string][]User)
@@ -48,7 +49,22 @@ func broadCastMessage(channelName string, message Message, exceptionUserName str
 			}
 		}
 	}
+}
 
+func userExit(channelName string, currentUserName string){
+	userExitMessage := Message{
+		Action:  ACTION_USER_EXIT,
+		From:    BACKEND_USER_NAME,
+		Content: currentUserName,
+	}
+	broadCastMessage(channelName, userExitMessage, currentUserName)
+	for i, v := range channels[channelName] {
+		if v.Name == currentUserName {
+			v.ws.Close()
+			channels[channelName] = append(channels[channelName][:i], channels[channelName][i+1:]...)
+			break
+		}
+	}
 }
 
 func debugMap(){
@@ -67,6 +83,7 @@ func Echo(ws *websocket.Conn) {
 	var emptyChannel []User = []User{
 		User{Name: BACKEND_USER_NAME, ws: nil},
 	}
+	var currentUserName string
 
 	debugMap()
 	if _, ok := channels[roomName]; !ok {
@@ -87,12 +104,12 @@ func Echo(ws *websocket.Conn) {
 	}
 	websocket.Message.Send(ws, string(userListJson))
 
-
 	for {
 		var messageFromClient string
 		var outputMessage Message
 		if err := websocket.Message.Receive(ws, &messageFromClient); err != nil {
 			fmt.Println("Can't receive")
+			userExit(roomName, currentUserName)
 			break
 		}
 		fmt.Println("Received back from client: " + messageFromClient)
@@ -104,6 +121,7 @@ func Echo(ws *websocket.Conn) {
 
 		switch message.Action {
 			case ACTION_NEW_USER :
+				currentUserName = message.From
 				addUserToChannel(roomName, User{Name: message.From, ws: ws})
 				outputMessage = Message{
 					Action:  ACTION_NEW_USER,
