@@ -77,9 +77,9 @@ func debugMap(){
 
 }
 
-// TODO handle deconnection
 func Echo(ws *websocket.Conn) {
 	var roomName = ws.Config().Protocol[0]
+
 	var emptyChannel []User = []User{
 		User{Name: BACKEND_USER_NAME, ws: nil},
 	}

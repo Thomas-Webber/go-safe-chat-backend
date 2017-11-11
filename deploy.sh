@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+PORT=8090
 dateFormat=$(date '+%Y-%m-%d_%H:%M:%S')
 executableName='goSafeChatBackend'
 newExecutableName="new_$executableName"
@@ -23,10 +24,11 @@ if [ -f $executable ]; then
 	mkdir -p oldBuilds
 	mv $executable oldBuilds/$oldExecutableName
 fi
-mv $newExecutableName $executable
+mv $newExecutableName $executableName
 
 sudo docker rm -f safechat_docker
 sudo docker build -t safechat .
-sudo docker run --name="safechat_docker" -d -t safechat
+sudo docker run --name="safechat_docker" -d -p $PORT:$PORT -t safechat
+sudo docker logs safechat_docker
 
 EOF

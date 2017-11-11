@@ -13,11 +13,11 @@ import (
 
 func main() {
 
-	http.Handle("/", websocket.Handler(safechat.Echo))
+	http.Handle("/wsapp", websocket.Handler(safechat.Echo))
 
-	fmt.Println("App started at port 8080")
+	fmt.Println("App started at port 8090")
 
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+	if err := http.ListenAndServe(":8090", nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
 }
